@@ -33,7 +33,18 @@ adecuados a partir de la información del caso.
 | Actor / stakeholder | Descripción | Intereses principales |
 |---|---|---|
 | ... | ... | ... |
-
+| Actor / stakeholder | Descripción | Intereses principales |
+|---|---|---|
+| Lector | Trabajador de Turbine que gestiona las facturas de los clientes que le ha asignado un Admin | Trabajar rápido, ver el historial del cliente y recibir avisos útiles |
+| Admin | Trabajador de Turbine con permisos sobre usuarios, asignación de clientes, configuración, objetivos y reglas corporativas | Controlar la configuración y recibir información de incidencias y fallos |
+| Superadmin (posible rol, ver Q-02) | Perfil para cambios de mayor impacto en las reglas corporativas | Que los cambios críticos solo los haga el perfil adecuado |
+| Solicitante / Aprobador | Roles dentro del flujo de aprobaciones (Lector o Admin según la operación) | Conocer el estado de sus solicitudes; gestionar las pendientes sin aprobar las propias |
+| Desarrollador / equipo técnico | Personas que mantienen y despliegan el sistema | Diagnosticar errores y desplegar de forma reproducible |
+| Alejandro Ruiz (Turbine) | Responsable de negocio que define las necesidades | Reglas económicas correctas y comprensibles; sistema mantenible y desplegable |
+| Cliente de Turbine | Empresa externa a la que se factura; no accede a la aplicación | Recibir correctamente facturas y comunicaciones |
+| Servicios de correo y mensajería (email, WhatsApp) | Servicios externos para enviar facturas, notificaciones y resúmenes | Entrega fiable; sus fallos deben quedar registrados |
+| Sistema de pagos / banca | Sistema externo donde se reflejan los cobros | Permitir la conciliación de cobros con facturas |
+| Agente de IA (futuro, ampliación) | Posible agente que opere contra la API | Disponer de documentación estructurada de la API |
 
 ## 2. Requisitos de negocio
 
