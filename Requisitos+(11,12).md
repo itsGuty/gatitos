@@ -32,9 +32,6 @@ adecuados a partir de la información del caso.
 
 | Actor / stakeholder | Descripción | Intereses principales |
 |---|---|---|
-| ... | ... | ... |
-| Actor / stakeholder | Descripción | Intereses principales |
-|---|---|---|
 | Lector | Trabajador de Turbine que gestiona las facturas de los clientes que le ha asignado un Admin | Trabajar rápido, ver el historial del cliente y recibir avisos útiles |
 | Admin | Trabajador de Turbine con permisos sobre usuarios, asignación de clientes, configuración, objetivos y reglas corporativas | Controlar la configuración y recibir información de incidencias y fallos |
 | Superadmin (posible rol, ver Q-02) | Perfil para cambios de mayor impacto en las reglas corporativas | Que los cambios críticos solo los haga el perfil adecuado |
