@@ -1,0 +1,51 @@
+@startuml
+skinparam actorStyle hollow
+skinparam defaultFontColor black
+skinparam defaultFontSize 12
+
+skinparam usecase {
+  BackgroundColor #E6E6FA
+  BorderColor #4B0082
+  ArrowColor #4B0082
+  FontColor black
+  FontStyle bold
+}
+
+skinparam actor {
+  FontColor black
+  FontStyle bold
+}
+
+left to right direction
+
+actor "Superadministrador" as SuperAdmin
+actor "Administrador" as Admin
+actor "Sistema / API Externa" as SystemAPI
+
+package "Módulo 6: Configuración y Cierres" {
+  usecase "CU-23: Configuración Global" as CU23
+  usecase "CU-25: Integración API y Webhooks" as CU25
+  usecase "CU-26: Cierre Fiscal y Backups" as CU26
+  
+  usecase "Validar Token de API" as ValidateApiToken
+  usecase "Bloquear Periodo Contable" as LockPeriod
+  usecase "Generar Copia de Seguridad Cifrada" as EncryptedBackup
+}
+
+SuperAdmin --- CU23
+SuperAdmin --- CU25
+SuperAdmin --- CU26
+Admin --- CU23
+Admin --- CU25
+SystemAPI --- CU25
+
+CU25 ..> ValidateApiToken : <<include>>
+CU26 ..> LockPeriod : <<include>>
+CU26 ..> EncryptedBackup : <<include>>
+
+note right of CU26
+  Precondición: Haber completado
+  el Módulo 5 (Informes para Gestoría).
+end note
+
+@enduml

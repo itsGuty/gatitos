@@ -1,0 +1,65 @@
+@startuml
+skinparam actorStyle hollow
+skinparam defaultFontColor black
+skinparam defaultFontSize 12
+
+skinparam usecase {
+  BackgroundColor #E6E6FA
+  BorderColor #4B0082
+  ArrowColor #4B0082
+  FontColor black
+  FontStyle bold
+}
+
+skinparam actor {
+  FontColor black
+  FontStyle bold
+}
+
+left to right direction
+
+actor "Administrador" as Admin
+actor "Usuario Operativo" as OpUser
+actor "Sistema / API Externa" as SystemAPI
+
+package "Módulo 2: Gestión de Clientes" {
+  usecase "CU-04: Asignación y Delegación" as CU04
+  usecase "CU-05: Alta de Nuevo Cliente" as CU05
+  usecase "CU-06: Gestión de Contactos y Fiscal" as CU06
+  usecase "CU-07: Pausa Temporal y Reactivación" as CU07
+  usecase "CU-08: Tramitar Baja Comercial" as CU08
+  usecase "CU-09: Fusión y Duplicados" as CU09
+  usecase "CU-10: Revisión Anual y Rango" as CU10
+  usecase "CU-11: Excepciones Comerciales" as CU11
+  
+  usecase "Verificar Datos en VIES" as VerifyTax
+  usecase "Anonimizar Datos (GDPR)" as AnonymizeData
+  usecase "Consolidar Historiales" as MergeHistory
+}
+
+Admin --- CU04
+Admin --- CU05
+Admin --- CU06
+Admin --- CU07
+Admin --- CU08
+Admin --- CU09
+Admin --- CU10
+Admin --- CU11
+
+OpUser --- CU05
+OpUser --- CU06
+OpUser --- CU07
+OpUser --- CU11
+
+SystemAPI --- CU08
+
+CU05 ..> VerifyTax : <<include>>
+CU08 ..> AnonymizeData : <<include>>
+CU09 ..> MergeHistory : <<include>>
+
+note right of AnonymizeData
+  Obligatorio por ley de protección
+  de datos al tramitar baja definitiva.
+end note
+
+@enduml

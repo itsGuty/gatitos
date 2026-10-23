@@ -1,0 +1,51 @@
+@startuml
+skinparam actorStyle hollow
+skinparam defaultFontColor black
+skinparam defaultFontSize 12
+
+skinparam usecase {
+  BackgroundColor #E6E6FA
+  BorderColor #4B0082
+  ArrowColor #4B0082
+  FontColor black
+  FontStyle bold
+}
+
+skinparam actor {
+  FontColor black
+  FontStyle bold
+}
+
+left to right direction
+
+actor "Usuario Operativo" as OpUser
+actor "Administrador" as Admin
+actor "Sistema (Cron)" as CronSystem
+actor "Sistema de Notificaciones" as NotifSystem
+
+package "Módulo 4: Operativa, Incidencias y Notificaciones" {
+  usecase "CU-18: Gestión de Incidencias" as CU18
+  usecase "CU-19: Historial de Notificaciones" as CU19
+  usecase "CU-20: Envío de Recordatorios" as CU20
+  
+  usecase "Pausar Cobros y Avisos" as PauseBilling
+  usecase "Generar Plantilla Email/SMS" as GenTemplate
+}
+
+OpUser --- CU18
+OpUser --- CU19
+Admin --- CU18
+Admin --- CU19
+CronSystem --- CU20
+NotifSystem --- CU20
+
+CU18 ..> PauseBilling : <<include>>
+CU20 ..> GenTemplate : <<include>>
+CU18 ..> CU20 : <<extends>>
+
+note right of CU18
+  Si hay incidencia activa, extiende
+  y detiene el envío del CU-20.
+end note
+
+@enduml

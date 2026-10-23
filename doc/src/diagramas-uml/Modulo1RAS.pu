@@ -1,0 +1,57 @@
+@startuml
+skinparam actorStyle hollow
+skinparam defaultFontColor black
+skinparam defaultFontSize 12
+
+skinparam usecase {
+  BackgroundColor #E6E6FA
+  BorderColor #4B0082
+  ArrowColor #4B0082
+  FontColor black
+  FontStyle bold
+}
+
+skinparam actor {
+  FontColor black
+  FontStyle bold
+}
+
+left to right direction
+
+actor "Superadministrador" as SuperAdmin
+actor "Administrador" as Admin
+actor "Usuario Operativo" as OpUser
+
+package "Módulo 1: Seguridad y Acceso" {
+  usecase "CU-01: Iniciar Sesión" as CU01
+  usecase "CU-02: Recuperar y Restablecer Contraseña" as CU02
+  usecase "CU-03: Cerrar Sesión" as CU03
+  usecase "CU-24: Consulta de Registros de Auditoría" as CU24
+  
+  usecase "Validar Credenciales y Token OTP" as ValidateOTP
+  usecase "Registrar Traza de Acceso" as LogAccess
+  usecase "Bloquear Cuenta por Intentos Fallidos" as BlockAccount
+  usecase "Filtrar por Rango de Fechas" as FilterAudit
+}
+
+SuperAdmin --- CU01
+SuperAdmin --- CU03
+SuperAdmin --- CU24
+Admin --- CU01
+Admin --- CU03
+OpUser --- CU01
+OpUser --- CU02
+OpUser --- CU03
+
+CU01 ..> ValidateOTP : <<include>>
+CU01 ..> LogAccess : <<include>>
+CU01 ..> BlockAccount : <<extends>>
+CU02 ..> CU01 : <<extends>>
+CU24 ..> FilterAudit : <<include>>
+
+note right of BlockAccount
+  Flujo de Excepción: Se activa
+  tras 3 intentos fallidos de login.
+end note
+
+@enduml

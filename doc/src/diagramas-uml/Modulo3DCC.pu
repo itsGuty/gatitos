@@ -1,0 +1,59 @@
+@startuml
+skinparam actorStyle hollow
+skinparam defaultFontColor black
+skinparam defaultFontSize 12
+
+skinparam usecase {
+  BackgroundColor #E6E6FA
+  BorderColor #4B0082
+  ArrowColor #4B0082
+  FontColor black
+  FontStyle bold
+}
+
+skinparam actor {
+  FontColor black
+  FontStyle bold
+}
+
+left to right direction
+
+actor "Administrador" as Admin
+actor "Superadministrador" as SuperAdmin
+actor "Usuario Operativo" as OpUser
+actor "Sistema (Cron)" as CronSystem
+actor "Pasarela de Pagos / API" as PaymentAPI
+
+package "Módulo 3: Facturación, Cobros y Conciliación" {
+  usecase "CU-12: Generación Facturas Recurrentes" as CU12
+  usecase "CU-13: Emisión Facturas Puntuales" as CU13
+  usecase "CU-14: Modificación y Rectificación" as CU14
+  usecase "CU-15: Consulta y Descarga" as CU15
+  usecase "CU-16: Conciliación de Pagos" as CU16
+  usecase "CU-17: Condonación y Gestión de Impagos" as CU17
+  
+  usecase "Calcular Impuestos y Retenciones" as CalcTax
+  usecase "Validar Firma Electrónica" as SignInvoice
+  usecase "Justificar Motivo y Adjuntar Docs" as AttachDocs
+  usecase "Solicitar Condonación Parcial" as PartialCondone
+}
+
+CronSystem --- CU12
+Admin --- CU13
+Admin --- CU14
+Admin --- CU15
+Admin --- CU16
+Admin --- CU17
+SuperAdmin --- CU14
+SuperAdmin --- CU17
+OpUser --- CU13
+OpUser --- CU15
+OpUser --- CU16
+PaymentAPI --- CU16
+
+CU13 ..> CalcTax : <<include>>
+CU13 ..> SignInvoice : <<include>>
+CU17 ..> AttachDocs : <<include>>
+CU17 ..> PartialCondone : <<extends>>
+
+@enduml

@@ -1,0 +1,42 @@
+@startuml
+skinparam actorStyle hollow
+skinparam defaultFontColor black
+skinparam defaultFontSize 12
+
+skinparam usecase {
+  BackgroundColor #E6E6FA
+  BorderColor #4B0082
+  ArrowColor #4B0082
+  FontColor black
+  FontStyle bold
+}
+
+skinparam actor {
+  FontColor black
+  FontStyle bold
+}
+
+left to right direction
+
+actor "Administrador" as Admin
+actor "Superadministrador" as SuperAdmin
+actor "Gestoría / Asesoría" as Gestoria
+
+package "Módulo 5: Informes y Control Financiero" {
+  usecase "CU-21: Dashboards y Métricas" as CU21
+  usecase "CU-22: Paquetes para Gestoría" as CU22
+  
+  usecase "Consolidar Libro de IVA" as TaxLedger
+  usecase "Exportar Formato ZIP/PDF" as ExportPackage
+}
+
+Admin --- CU21
+Admin --- CU22
+SuperAdmin --- CU21
+SuperAdmin --- CU22
+Gestoria --- CU22
+
+CU22 ..> TaxLedger : <<include>>
+CU22 ..> ExportPackage : <<include>>
+
+@enduml
