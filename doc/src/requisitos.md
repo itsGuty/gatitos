@@ -35,7 +35,7 @@ adecuados a partir de la información del caso.
 | Lector | Trabajador de Turbine que gestiona las facturas de los clientes que le ha asignado un Admin | Trabajar rápido, ver el historial del cliente y recibir avisos útiles |
 | Admin | Trabajador de Turbine con permisos sobre usuarios, asignación de clientes, configuración, objetivos y reglas corporativas | Controlar la configuración y recibir información de incidencias y fallos |
 | Superadmin (posible rol, ver Q-02) | Perfil para cambios de mayor impacto en las reglas corporativas | Que los cambios críticos solo los haga el perfil adecuado |
-| Solicitante / Aprobador | Roles dentro del flujo de aprobaciones (Lector o Admin según la operación) | Conocer el estado de sus solicitudes; gestionar las pendientes sin aprobar las propias |
+| Solicitante / Aprobador | Roles dentro del flujo de aprobaciones (Lector, Superadmin o Admin según la operación) | Conocer el estado de sus solicitudes; gestionar las pendientes sin aprobar las propias; Superadmin tendrá más permisos (dar permisos a admin, aprobar decisiones más importantes) que Admin (aprobar decisiones, gestionar lectores), y Admin a su vez tendrá mas que Lector (leer facturas e info. general en la app).  |
 | Desarrollador / equipo técnico | Personas que mantienen y despliegan el sistema | Diagnosticar errores y desplegar de forma reproducible |
 | Alejandro Ruiz (Turbine) | Responsable de negocio que define las necesidades | Reglas económicas correctas y comprensibles; sistema mantenible y desplegable |
 | Cliente de Turbine | Empresa externa a la que se factura; no accede a la aplicación | Recibir correctamente facturas y comunicaciones |
@@ -112,6 +112,7 @@ serán necesarios para proporcionarle ese servicio.
 | UR-14 | Lector con permiso explícito | Pausar los recordatorios de impago de un caso concreto indicando el motivo | Cliente / entrevista |
 | UR-15 | Lector | Gestionar el estado de un cliente y sus recurrencias recibiendo avisos o bloqueos claros y explicados | Cliente / entrevista |
 | UR-16 | Solicitante / Aprobador | Consultar el estado de sus solicitudes y el comentario del aprobador (solicitante) y disponer de una bandeja de pendientes (aprobador) | Cliente / entrevista |
+| UR-17 | Trazabilidad | Cada decisión tomada / permiso dado debe quedar definido el número identificador (usuario) del administrador/superadministrador que lo ha autorizado | Cliente / entrevista |
 
 ## 4. Requisitos del sistema
 
@@ -147,7 +148,7 @@ Eso corresponde al diseño, no a los requisitos.
 | FR-03 | El sistema deberá permitir hacer login en la plataforma | UR-01 |
 | FR-04 | El sistema deberá realizar analíticas de pagos e impagos tras 1 semana, 1 mes y 1 año | UR-05 |
 | FR-05 | El sistema deberá enviar notificaciones de impago al cliente por vías como email o Whatsapp (a partir del día 5 cada 2-3 días) (antes de ser impago notif dia 3 y 5 de pago en plazo) | UR-05 |
-| FR-06 | El sistema deberá tener dos roles (admin y lector) | UR-03 |
+| FR-06 | El sistema deberá tener tres roles (Superadmin, admin y lector) | UR-03 |
 | FR-07 | El sistema deberá tener una copia de seguridad del registro de movimientos y los accesos cedidos a los lectores para el admin | UR-03 |
 | FR-09 | El sistema deberá evaluar anualmente posible cambio de plan según ingresos anuales | UR-05 |
 | FR-10 | El sistema deberá permitir que los lectores puedan leer y descargar facturas | UR-02 |
@@ -257,7 +258,7 @@ un requisito.
 | ID | Suposición o decisión | Justificación | Requisitos afectados |
 |---|---|---|---|
 | A-01 | «Usuario» es cualquier trabajador de Turbine que usa la aplicación (Admin o Lector). «Cliente» es una empresa externa a la que Turbine factura: aparece en el sistema como un registro, pero no accede a la aplicación. Por tanto, el código de incidencia y los mensajes de error se muestran a trabajadores de Turbine, a quienes tampoco se les enseña información técnica sensible | La aplicación es interna; solo la usan trabajadores de Turbine | UR-08, FR-16 |
-| A-02 | El login con cuenta interna, los dos roles (Admin y Lector), la asignación de clientes a lectores y la web responsive ya están recogidos (UR-01, UR-03, FR-03, FR-06, NFR-02, NFR-07) y no se repiten aquí | Evitar duplicados al unir las partes del equipo | FR-23, NFR-16 |
+| A-02 | El login con cuenta interna, los tres roles (Superadmin, admin y Lector), la asignación de clientes a lectores y la web responsive ya están recogidos (UR-01, UR-03, FR-03, FR-06, NFR-02, NFR-07) y no se repiten aquí | Evitar duplicados al unir las partes del equipo | FR-23, NFR-16 |
 | A-03 | Los duplicados se detectan por correo, identificador fiscal o nombre y se resuelven con un aviso, sin bloqueo automático | El cliente pide «duplicados razonables» sin concretar | FR-17 |
 | A-04 | La línea temporal es una vista única desde la ficha del cliente; la auditoría completa queda aparte | El cliente dice que la auditoría completa «puede estar aparte» y no fija el número de pasos | FR-15, FR-20 |
 | A-05 | Se propone un tiempo de inactividad por defecto de 30 minutos, configurable | «Razonable» no es verificable; propuesta pendiente de confirmar | FR-22 |
@@ -328,9 +329,9 @@ los requisitos de usuario y los requisitos del sistema.
 | Entidad emisora | Sociedad de Turbine que emite las facturas, con sus datos fiscales, series y cuentas |
 | Centro de coste / proyecto | Etiqueta para clasificar facturas a efectos de informes; no es contabilidad completa |
 | Moneda base | Moneda en la que se consolidan los importes del dashboard |
-| Prorrateo | Reparto proporcional de un importe según el tiempo de servicio efectivo |
+| Prorrateo | Reparto proporcional de un importe según el tiempo de servicio efectivo (cantidad a pagar correspondiente con  el mes restante tras su subscripción al servicio) |
 | Generación mensual idempotente | Generación de las facturas del mes que, si se repite, no crea duplicados |
 | Conciliación | Contraste de los cobros recibidos con las facturas emitidas para saber cuáles están pagadas |
 | Separación de funciones | Regla por la que quien solicita una operación no puede aprobarla |
 | Escenario de aceptación | Descripción en lenguaje de negocio de una situación y su resultado esperado, que permite validar una regla |
-| Secretos | Credenciales, claves y otros datos sensibles que no deben estar en el código |
+| Secretos | Credenciales, claves y otros datos sensibles que no deben estar en el código. No se compratirán, simplemente son para que la empresa pueda reconocer quienes son sus clientes |
