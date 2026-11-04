@@ -115,8 +115,8 @@
 
 * **Identificador:** CU-05
 * **Objetivo:** Dar de alta a un cliente (empresa) en la plataforma con la menor cantidad de clics posible, minimizando errores y asegurando la integridad fiscal.
-* **Actor o actores participantes:** Administrador, Usuario Operativo.
-* **Precondiciones:** El usuario tiene permisos para crear clientes y los parámetros globales (monedas, impuestos, tarifas) están configurados.
+* **Actor o actores participantes:** Administrador.
+* **Precondiciones:** El usuario (administrador) tiene permisos para crear clientes y los parámetros globales (monedas, impuestos, tarifas) están configurados.
 * **Flujo principal:**
 1. El usuario pulsa "Alta de Cliente".
 2. El usuario introduce la Razón Social, Nombre Comercial e Identificador Fiscal (NIF/CIF/Tax ID).
@@ -173,7 +173,7 @@
 
 * **Identificador:** CU-07
 * **Objetivo:** Pausar temporalmente la suscripción de un cliente por motivos justificados o reactivar un cliente pausado.
-* **Actor o actores participantes:** Administrador, Usuario Operativo, Sistema.
+* **Actor o actores participantes:** Administrador, Sistema.
 * **Precondiciones:** El cliente debe estar en estado activo o pausado.
 * **Flujo principal:**
 1. El usuario accede a la suscripción del cliente y selecciona "Solicitar Pausa Temporal".
@@ -330,26 +330,27 @@
 
 ### CU-13: Emisión de Facturas Puntuales y Presupuestos
 
-* **Identificador:** CU-13
-* **Objetivo:** Crear y emitir facturas no recurrentes o presupuestos previos para servicios adicionales o ventas directas.
-* **Actor o actores participantes:** Administrador, Usuario Operativo.
-* **Precondiciones:** El cliente debe estar registrado en el sistema.
-* **Flujo principal:**
-1. El usuario hace clic en "Nueva Factura Puntual" (o "Nuevo Presupuesto").
-2. El usuario selecciona el cliente, moneda y líneas de detalle (concepto del catálogo o personalizado, cantidad, precio unitario, descuento aplicable e impuestos).
-3. El sistema valida los importes, calcula subtotales y muestra el borrador en pantalla.
-4. Si es una factura, el usuario presiona "Emitir Factura"; el sistema asigna serie/número correlativo oficial y genera el PDF.
+- **Identificador:** CU-13
+- **Objetivo:** Crear y emitir facturas no recurrentes o presupuestos previos para servicios adicionales o ventas directas, asociadas a una entidad emisora específica.
+- **Actor o actores participantes:** Administrador, Usuario Operativo.
+- **Precondiciones:** 
+  1. El cliente debe estar registrado en el sistema.
+  2. Debe existir al menos una entidad emisora configurada y activa en el sistema.
+- **Flujo principal:**
+  1. El usuario hace clic en "Nueva Factura Puntual" (o "Nuevo Presupuesto").
+  2. El usuario selecciona la entidad emisora que facturará el servicio (según UR-35).
+  3. El usuario selecciona el cliente, moneda y líneas de detalle (concepto del catálogo o personalizado, cantidad, precio unitario, descuento aplicable e impuestos).
+  4. El sistema valida los importes, calcula subtotales y muestra el borrador en pantalla con los datos fiscales y la plantilla visual de la entidad emisora seleccionada.
+  5. Si es una factura, el usuario presiona "Emitir Factura"; el sistema asigna la serie y número correlativo oficial correspondiente a la entidad emisora seleccionada y genera el PDF.
 
+- **Flujos alternativos:**
+  - *A1: Convertir Presupuesto Aceptado en Factura:* El usuario genera un presupuesto asociándolo a una entidad emisora, lo envía al cliente y, tras su aceptación, presiona "Convertir en Factura", reutilizando automáticamente todas las líneas de detalle y manteniendo (o permitiendo reasignar) la entidad emisora para emitir el documento.
 
-* **Flujos alternativos:**
-* *A1: Convertir Presupuesto Aceptado en Factura:* El usuario genera un presupuesto, lo envía al cliente y, tras su aceptación, presiona "Convertir en Factura", reutilizando automáticamente todas las líneas de detalle para emitir el documento.
+- **Flujos de excepción:**
+  - *E1: Alerta de variación de precio inusual (Price Checker):* Si el precio ingresado fluctúa drásticamente de la media o del catálogo, el sistema muestra una advertencia de verificación antes de confirmar.
+  - *E2: Falta de serie o configuración fiscal en la entidad emisora:* Si la entidad emisora seleccionada no tiene parametrizada una serie correlativa de facturación o datos fiscales válidos, el sistema bloquea la emisión y muestra un mensaje solicitando al Administrador su configuración previa.
 
-
-* **Flujos de excepción:**
-* *E1: Alerta de variación de precio inusual (Price Checker):* Si el precio ingresado fluctúa drásticamente de la media o del catálogo, el sistema muestra una advertencia de verificación antes de confirmar.
-
-
-* **Postcondiciones:** La factura puntual o presupuesto queda registrada; el balance del cliente se actualiza con los nuevos importes emitidos.
+- **Postcondiciones:** La factura puntual o presupuesto queda registrada asociándole su correspondiente entidad emisora; el balance del cliente se actualiza con los nuevos importes emitidos y la serie numérica de la entidad seleccionada se incrementa correlativamente.
 
 ---
 
@@ -401,6 +402,8 @@
 
 * **Flujos de excepción:**
 * *E1: Intento de acceso mediante URL adivinable sin permisos:* El sistema intercepta la petición, verifica los permisos del token y deniega el acceso con un error de autorización.
+* *E2: Otro error:* Si hay error en usuario se guarda la traza en el servidor para poder auditarla y se muestra al usuario código de error.
+
 
 
 * **Postcondiciones:** Los documentos son entregados en el formato correcto sin alterar los datos del sistema ni exponer información no autorizada.
@@ -534,6 +537,7 @@
 
 * **Flujos de excepción:**
 * *E1: Error general en el proveedor de comunicaciones:* El proceso aísla las fallas, las almacena en la cola de errores de integración e intenta el reenvío en el siguiente ciclo sin congelar el sistema.
+* *E2: Otro error:* Si hay error en usuario se guarda la traza en el servidor para poder auditarla y se muestra al usuario código de error.
 
 
 * **Postcondiciones:** Se envían y registran las notificaciones de cobranza manteniendo el historial de entrega en la ficha de la factura.
@@ -543,13 +547,13 @@
 ### CU-21: Visualización de Dashboards y Indicadores
 
 * **Identificador:** CU-21
-* **Objetivo:** Presentar paneles de información operativa y financiera consolidada con filtros avanzados y accesos directos a la gestión diaria.
+* **Objetivo:** Presentar paneles de información operativa y financiera consolidada con filtros avanzados y accesos directos a la gestión diaria. Permite configurar alertas personales.
 * **Actor o actores participantes:** Superadministrador, Administrador, Usuario Operativo.
 * **Precondiciones:** El usuario está autenticado y posee asignaciones/permisos para consultar métricas.
 * **Flujo principal:**
 1. El usuario accede al Dashboard principal de la aplicación.
 2. El sistema identifica el rol y asignaciones del usuario para estructurar los datos:
-* **Dashboard de Trabajo Diario:** Presenta facturas que vencen pronto, facturas vencidas, cobros por conciliar, problemas de entrega/rebotes, aprobaciones pendientes, revisiones anuales e incidencias del usuario.
+* **Dashboard de Trabajo Diario:** Presenta pestaña de clientes favoritos, facturas que vencen pronto, facturas vencidas, cobros por conciliar, problemas de entrega/rebotes, aprobaciones pendientes, revisiones anuales e incidencias del usuario.
 * **Dashboard Financiero (Admin/Superadmin):** Presenta facturación (semana, mes, trimestre, año), totales cobrados, pendientes y vencidos, tiempo medio de cobro, previsiones de ingresos recurrentes (MRR), evolución y clientes con mayor deuda.
 
 
