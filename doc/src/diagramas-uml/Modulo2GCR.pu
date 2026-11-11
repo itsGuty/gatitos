@@ -46,9 +46,7 @@ Admin --- CU09
 Admin --- CU10
 Admin --- CU11
 
-OpUser --- CU05
 OpUser --- CU06
-OpUser --- CU07
 OpUser --- CU11
 
 SystemAPI --- CU08
@@ -56,6 +54,16 @@ SystemAPI --- CU08
 CU05 ..> VerifyTax : <<include>>
 CU08 ..> AnonymizeData : <<include>>
 CU09 ..> MergeHistory : <<include>>
+
+note right of CU05
+  Restricción: El Usuario Operativo NO puede
+  dar de alta a sus propios clientes.
+end note
+
+note right of CU07
+  Restricción: La pausa y reactivación
+  es competencia exclusiva del Administrador.
+end note
 
 note right of AnonymizeData
   Obligatorio por ley de protección

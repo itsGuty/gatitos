@@ -28,6 +28,7 @@ package "Módulo 5: Informes y Control Financiero" {
   
   usecase "Consolidar Libro de IVA" as TaxLedger
   usecase "Exportar Formato ZIP/PDF" as ExportPackage
+  usecase "Configurar Favoritos y Alertas" as ConfigFavorites
 }
 
 Admin --- CU21
@@ -38,5 +39,11 @@ Gestoria --- CU22
 
 CU22 ..> TaxLedger : <<include>>
 CU22 ..> ExportPackage : <<include>>
+CU21 ..> ConfigFavorites : <<include>>
+
+note right of CU21
+  Permite pestañas de favoritos
+  y configuración de alertas personales.
+end note
 
 @enduml

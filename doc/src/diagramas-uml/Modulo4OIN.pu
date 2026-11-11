@@ -30,6 +30,7 @@ package "Módulo 4: Operativa, Incidencias y Notificaciones" {
   
   usecase "Pausar Cobros y Avisos" as PauseBilling
   usecase "Generar Plantilla Email/SMS" as GenTemplate
+  usecase "Registrar Traza por Error de Usuario (E1)" as LogNotifError
 }
 
 OpUser --- CU18
@@ -42,10 +43,16 @@ NotifSystem --- CU20
 CU18 ..> PauseBilling : <<include>>
 CU20 ..> GenTemplate : <<include>>
 CU18 ..> CU20 : <<extends>>
+CU20 ..> LogNotifError : <<extends>>
 
 note right of CU18
   Si hay incidencia activa, extiende
   y detiene el envío del CU-20.
+end note
+
+note right of CU20
+  E1: Guarda traza de auditoría
+  ante errores de usuario o destinatario.
 end note
 
 @enduml

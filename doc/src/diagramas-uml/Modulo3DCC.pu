@@ -36,6 +36,7 @@ package "Módulo 3: Facturación, Cobros y Conciliación" {
   usecase "Validar Firma Electrónica" as SignInvoice
   usecase "Justificar Motivo y Adjuntar Docs" as AttachDocs
   usecase "Solicitar Condonación Parcial" as PartialCondone
+  usecase "Registrar Traza por Error de Usuario (E2)" as AuditUserError
 }
 
 CronSystem --- CU12
@@ -55,5 +56,11 @@ CU13 ..> CalcTax : <<include>>
 CU13 ..> SignInvoice : <<include>>
 CU17 ..> AttachDocs : <<include>>
 CU17 ..> PartialCondone : <<extends>>
+CU15 ..> AuditUserError : <<extends>>
+
+note right of CU13
+  Soporta la emisión para
+  múltiples entidades emisoras.
+end note
 
 @enduml
