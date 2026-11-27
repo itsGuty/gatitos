@@ -1,0 +1,343 @@
+@startuml
+' ==========================================
+' ESTILO VISUAL ATRACTIVO Y LEGIBLE
+' ==========================================
+hide circle
+scale 1.0
+skinparam dpi 150
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam nodesep 45
+skinparam ranksep 65
+skinparam backgroundColor #FFFFFF
+
+skinparam defaultFontName "DejaVu Sans, Arial, Helvetica, sans-serif"
+skinparam defaultFontSize 11
+
+skinparam class {
+  BackgroundColor #F8FAFC
+  BorderColor #334155
+  BorderThickness 1.3
+  ArrowColor #0F766E
+  ArrowThickness 1.4
+  FontColor #0F172A
+  HeaderBackgroundColor #1E3A8A
+  HeaderFontColor #FFFFFF
+  HeaderFontStyle bold
+  AttributeFontColor #1E293B
+  AttributeFontSize 10
+}
+
+skinparam note {
+  BackgroundColor #FEF3C7
+  BorderColor #D97706
+  FontColor #78350F
+  FontSize 10
+}
+
+title Diseño Físico Entidad-Relación (ER) — FACTURBINEH
+
+' ==========================================
+' 1. SEGURIDAD Y CONTROL DE ACCESO (CU-01 a CU-04)
+' ==========================================
+
+entity "ROL" as rol #EFF6FF {
+  * id_rol : INT <<PK, AUTO_INCREMENT>>
+  --
+  * nombre_rol : VARCHAR(30) <<UNIQUE>>
+  * permisos_json : TEXT
+}
+
+entity "USUARIO" as usuario #EFF6FF {
+  * id_usuario : INT <<PK, AUTO_INCREMENT>>
+  --
+  * id_rol : INT <<FK>>
+  * nombre : VARCHAR(100)
+  * apellidos : VARCHAR(150)
+  * correo_corporativo : VARCHAR(150) <<UNIQUE>>
+  * password_hash : VARCHAR(255)
+  * estado : VARCHAR(20)
+  * intentos_fallidos : INT
+  token_recuperacion : VARCHAR(255)
+  expiracion_token : TIMESTAMP
+}
+
+' ==========================================
+' 2. GESTIÓN COMERCIAL Y CLIENTES (CU-04 a CU-10)
+' ==========================================
+
+entity "TARIFA_PLAN" as tarifa #F0FDFA {
+  * id_tarifa : INT <<PK, AUTO_INCREMENT>>
+  --
+  * nombre_plan : VARCHAR(100)
+  * precio_rango : DECIMAL(10,2)
+  * umbral_facturacion_anual : DECIMAL(12,2)
+}
+
+entity "CLIENTE" as cliente #F0FDFA {
+  * id_cliente : INT <<PK, AUTO_INCREMENT>>
+  --
+  id_tarifa : INT <<FK>>
+  id_cliente_absorbente : INT <<FK>>
+  * razon_social : VARCHAR(150)
+  nombre_comercial : VARCHAR(150)
+  * identificador_fiscal : VARCHAR(50) <<UNIQUE>>
+  * domicilio_fiscal : TEXT
+  * pais : VARCHAR(50)
+  * moneda_habitual : VARCHAR(3)
+  * vencimiento_defecto_dias : INT
+  sector : VARCHAR(100)
+  etiquetas : VARCHAR(255)
+  * estado_comercial : VARCHAR(30)
+  * es_duplicado_falso : BOOLEAN
+  fecha_inicio_pausa : DATE
+  fecha_fin_pausa : DATE
+  motivo_pausa : TEXT
+}
+
+entity "ASIGNACION_CLIENTE" as asignacion #F0FDFA {
+  * id_asignacion : INT <<PK, AUTO_INCREMENT>>
+  --
+  * id_cliente : INT <<FK>>
+  * id_usuario : INT <<FK>>
+  * fecha_inicio : DATE
+  fecha_fin : DATE
+  * es_titular_principal : BOOLEAN
+}
+
+entity "CONTACTO" as contacto #F0FDFA {
+  * id_contacto : INT <<PK, AUTO_INCREMENT>>
+  --
+  * id_cliente : INT <<FK>>
+  * nombre : VARCHAR(100)
+  cargo : VARCHAR(100)
+  * email : VARCHAR(150)
+  telefono : VARCHAR(30)
+  * canales_autorizados : VARCHAR(50)
+  * es_principal_facturacion : BOOLEAN
+  * activo : BOOLEAN
+}
+
+' ==========================================
+' 3. MOTOR DE FACTURACIÓN Y CONTABILIDAD (CU-12 a CU-15, CU-26)
+' ==========================================
+
+entity "ENTIDAD_EMISORA" as emisora #EEF2FF {
+  * id_entidad : INT <<PK, AUTO_INCREMENT>>
+  --
+  * razon_social : VARCHAR(150)
+  * nif : VARCHAR(50) <<UNIQUE>>
+  * datos_fiscales : TEXT
+  * serie_ordinaria : VARCHAR(15)
+  * serie_rectificativa : VARCHAR(15)
+  * plantilla_visual_ref : VARCHAR(255)
+  * activa : BOOLEAN
+}
+
+entity "PERIODO_FISCAL" as periodo #EEF2FF {
+  * id_periodo : INT <<PK, AUTO_INCREMENT>>
+  --
+  id_usuario_cierre : INT <<FK>>
+  * trimestre : VARCHAR(10) <<UNIQUE>>
+  * fecha_inicio : DATE
+  * fecha_fin : DATE
+  * estado : VARCHAR(20)
+  fecha_cierre : TIMESTAMP
+}
+
+entity "PRESUPUESTO" as presupuesto #EEF2FF {
+  * id_presupuesto : INT <<PK, AUTO_INCREMENT>>
+  --
+  * id_cliente : INT <<FK>>
+  * id_entidad_emisora : INT <<FK>>
+  * fecha_creacion : DATE
+  * validez_hasta : DATE
+  * estado : VARCHAR(20)
+  * total_estimado : DECIMAL(10,2)
+}
+
+entity "LINEA_PRESUPUESTO" as linea_presupuesto #EEF2FF {
+  * id_linea_presupuesto : INT <<PK, AUTO_INCREMENT>>
+  --
+  * id_presupuesto : INT <<FK>>
+  * concepto : VARCHAR(255)
+  * cantidad : DECIMAL(10,2)
+  * precio_unitario : DECIMAL(10,2)
+  * descuento_aplicado : DECIMAL(5,2)
+  * porcentaje_impuesto : DECIMAL(5,2)
+  * subtotal_linea : DECIMAL(10,2)
+}
+
+entity "FACTURA" as factura #EEF2FF {
+  * id_factura : INT <<PK, AUTO_INCREMENT>>
+  --
+  * id_cliente : INT <<FK>>
+  * id_entidad_emisora : INT <<FK>>
+  * id_periodo : INT <<FK>>
+  id_presupuesto_origen : INT <<FK>>
+  id_factura_original : INT <<FK>>
+  * serie : VARCHAR(15)
+  * numero_correlativo : VARCHAR(50) <<UNIQUE>>
+  * tipo_factura : VARCHAR(20)
+  * estado : VARCHAR(30)
+  * moneda : VARCHAR(3)
+  * subtotal : DECIMAL(10,2)
+  * impuestos_totales : DECIMAL(10,2)
+  * importe_total : DECIMAL(10,2)
+  * fecha_emision : DATE
+  * fecha_vencimiento : DATE
+  motivo_perdon_deuda : TEXT
+  ruta_pdf_generado : VARCHAR(255)
+}
+
+entity "LINEA_FACTURA" as linea_factura #EEF2FF {
+  * id_linea : INT <<PK, AUTO_INCREMENT>>
+  --
+  * id_factura : INT <<FK>>
+  * concepto : VARCHAR(255)
+  * cantidad : DECIMAL(10,2)
+  * precio_unitario : DECIMAL(10,2)
+  * descuento_aplicado : DECIMAL(5,2)
+  * porcentaje_impuesto : DECIMAL(5,2)
+  * subtotal_linea : DECIMAL(10,2)
+}
+
+' ==========================================
+' 4. COBROS, APROBACIONES E INCIDENCIAS (CU-11, CU-16 a CU-18)
+' ==========================================
+
+entity "MOVIMIENTO_PAGO" as pago #FFFBEB {
+  * id_pago : INT <<PK, AUTO_INCREMENT>>
+  --
+  * id_factura : INT <<FK>>
+  * referencia_pasarela : VARCHAR(100) <<UNIQUE>>
+  * origen : VARCHAR(30)
+  * importe_recibido : DECIMAL(10,2)
+  * fecha_cobro : TIMESTAMP
+  * estado_conciliacion : VARCHAR(30)
+}
+
+entity "SOLICITUD_APROBACION" as solicitud #FFFBEB {
+  * id_solicitud : INT <<PK, AUTO_INCREMENT>>
+  --
+  * id_cliente : INT <<FK>>
+  id_factura : INT <<FK>>
+  * id_solicitante : INT <<FK>>
+  id_aprobador : INT <<FK>>
+  * tipo_solicitud : VARCHAR(30)
+  * estado : VARCHAR(20)
+  porcentaje_descuento : DECIMAL(5,2)
+  meses_carencia : INT
+  * motivo_justificacion : TEXT
+  comentario_resolucion : TEXT
+  * fecha_solicitud : TIMESTAMP
+  fecha_resolucion : TIMESTAMP
+}
+
+entity "INCIDENCIA" as incidencia #FFFBEB {
+  * id_incidencia : INT <<PK, AUTO_INCREMENT>>
+  --
+  * id_cliente : INT <<FK>>
+  id_factura : INT <<FK>>
+  * id_responsable : INT <<FK>>
+  * prioridad : VARCHAR(20)
+  * estado : VARCHAR(20)
+  * descripcion : TEXT
+  * pausar_notificaciones_cobro : BOOLEAN
+  resolucion : TEXT
+  * fecha_apertura : TIMESTAMP
+  fecha_cierre : TIMESTAMP
+}
+
+' ==========================================
+' 5. NOTIFICACIONES, AUDITORÍA Y PARÁMETROS (CU-19 a CU-26)
+' ==========================================
+
+entity "PLANTILLA_NOTIFICACION" as plantilla #FDF2F8 {
+  * id_plantilla : INT <<PK, AUTO_INCREMENT>>
+  --
+  * tipo_notificacion : VARCHAR(50)
+  * idioma : VARCHAR(5)
+  * cuerpo_mensaje : TEXT
+  * version : INT
+  * activa : BOOLEAN
+}
+
+entity "NOTIFICACION" as notificacion #FDF2F8 {
+  * id_notificacion : INT <<PK, AUTO_INCREMENT>>
+  --
+  * id_plantilla : INT <<FK>>
+  * id_contacto : INT <<FK>>
+  * id_cliente : INT <<FK>>
+  id_factura : INT <<FK>>
+  * canal : VARCHAR(20)
+  * destino : VARCHAR(150)
+  * estado_entrega : VARCHAR(20)
+  * fecha_intento : TIMESTAMP
+}
+
+entity "REGISTRO_AUDITORIA" as auditoria #F1F5F9 {
+  * id_auditoria : INT <<PK, AUTO_INCREMENT>>
+  --
+  id_usuario : INT <<FK>>
+  * accion_realizada : VARCHAR(150)
+  * tabla_afectada : VARCHAR(50)
+  * registro_id : INT
+  valor_anterior : TEXT
+  valor_nuevo : TEXT
+  * ip_origen : VARCHAR(45)
+  * fecha_hora : TIMESTAMP
+}
+
+entity "CONFIGURACION_GLOBAL" as config #F1F5F9 {
+  * id_config : INT <<PK, AUTO_INCREMENT>>
+  --
+  * clave_parametro : VARCHAR(100) <<UNIQUE>>
+  * valor_parametro : TEXT
+  descripcion : VARCHAR(255)
+  * fecha_ultima_modificacion : TIMESTAMP
+}
+
+' ==========================================
+' RELACIONES Y CARDINALIDADES FÍSICAS
+' ==========================================
+
+rol ||--o{ usuario : "define permisos de"
+usuario ||--o{ asignacion : "gestiona"
+cliente ||--o{ asignacion : "asignado en"
+
+tarifa ||--o{ cliente : "aplica a"
+cliente ||--|{ contacto : "posee (mín. 1)"
+cliente |o--o| cliente : "absorbe duplicado"
+
+cliente ||--o{ presupuesto : "solicita"
+emisora ||--o{ presupuesto : "emite"
+presupuesto ||--|{ linea_presupuesto : "desglosa"
+presupuesto |o--o| factura : "se convierte en"
+
+cliente ||--o{ factura : "recibe"
+emisora ||--o{ factura : "emite"
+periodo ||--o{ factura : "agrupa"
+usuario |o--o{ periodo : "cierra"
+factura ||--|{ linea_factura : "contiene (mín. 1)"
+factura |o--o| factura : "rectifica a"
+
+factura ||--o{ pago : "se salda con"
+
+cliente ||--o{ solicitud : "afecta a"
+factura |o--o{ solicitud : "vinculada a"
+usuario ||--o{ solicitud : "crea (solicitante)"
+usuario |o--o{ solicitud : "resuelve (aprobador)"
+
+cliente ||--o{ incidencia : "genera"
+factura |o--o{ incidencia : "disputada en"
+usuario ||--o{ incidencia : "atiende"
+
+plantilla ||--o{ notificacion : "formatea"
+contacto ||--o{ notificacion : "recibe"
+cliente ||--o{ notificacion : "asociada a"
+factura |o--o{ notificacion : "reclama"
+
+usuario |o--o{ auditoria : "ejecuta acción"
+
+@enduml

@@ -1,0 +1,378 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+
+' ==========================================
+' ENUMERACIONES (Restricciones de Valores)
+' ==========================================
+
+
+enum RolUsuario {
+  SUPERADMINISTRADOR
+  ADMINISTRADOR
+  USUARIO_OPERATIVO
+}
+
+
+enum EstadoUsuario {
+  ACTIVO
+  INACTIVO
+  BLOQUEADO
+}
+
+
+enum EstadoCliente {
+  ACTIVO
+  PAUSADO
+  BAJA
+  FUSIONADO
+}
+
+
+enum CanalComunicacion {
+  EMAIL
+  WHATSAPP
+}
+
+
+enum TipoAprobacion {
+  DESCUENTO
+  CONDONACION_DEUDA
+}
+
+
+enum EstadoSolicitud {
+  PENDIENTE
+  APROBADA
+  RECHAZADA
+}
+
+
+enum EstadoFactura {
+  BORRADOR
+  EMITIDA
+  PAGADA
+  VENCIDA
+  CONDONADA
+  PARCIAL
+}
+
+
+enum EstadoPresupuesto {
+  BORRADOR
+  ENVIADO
+  ACEPTADO
+  RECHAZADO
+}
+
+
+enum EstadoIncidencia {
+  ABIERTA
+  CERRADA
+}
+
+
+enum PrioridadIncidencia {
+  BAJA
+  MEDIA
+  ALTA
+  CRITICA
+}
+
+
+enum EstadoEntregaNotificacion {
+  ENVIADO
+  REBOTE
+  ENTREGADO
+}
+
+
+enum EstadoPeriodoFiscal {
+  ABIERTO
+  CERRADO
+}
+
+
+enum EstadoConciliacion {
+  TOTAL
+  PARCIAL
+  DISCREPANCIA
+  DOBLE_PAGO
+}
+
+
+' ==========================================
+' CLASES Y ENTIDADES
+' ==========================================
+
+
+class Usuario {
+  - int id_usuario
+  - String correo
+  - String password_hash
+  - RolUsuario rol
+  - boolean estado
+  + iniciarSesion()
+  + recuperarContraseña()
+  + restablecerContraseña()
+}
+
+
+class Rol {
+  - int id_rol
+  - RolUsuario nombreRol
+  - String[] permisos
+  + asignarPermisos()
+  + verificarPermiso()
+}
+
+
+class EntidadEmisora {
+  - int id_entidad
+  - String nombre
+  - String datos_fiscales
+  - String serie_facturacion
+  + validarConfiguracionFiscal()
+  + obtenerSiguienteNumeroCorrelativo()
+}
+
+
+class Cliente {
+  - int id_cliente
+  - String razon_social
+  - String nif_cif
+  - String moneda
+  - EstadoCliente estado_comercial
+  + crearCliente()
+  + modificarDatos()
+  + pausarSuscripcion()
+  + reactivarSuscripcion()
+  + tramitarBajaComercial()
+  + fusionarCon(Cliente)
+}
+
+
+class Contacto {
+  - int id_contacto
+  - String nombre
+  - String email
+  - boolean es_principal
+  - boolean activo
+  + crearContacto()
+  + modificarContacto()
+  + desactivarContacto()
+}
+
+
+class AsignacionCliente {
+  - int id_asignacion
+  - Date fecha_inicio
+  - Date fecha_fin
+  - boolean es_titular_principal
+  + asignarTitular()
+  + crearDelegacion()
+  + expirarDelegacion()
+  + reasignarDefinitivo()
+}
+
+
+class TarifaPlan {
+  - int id_tarifa
+  - String nombrePlan
+  - double precioRango
+  - double umbralFacturacionAnual
+  + evaluarCambioDeRango()
+  + aplicarNuevaTarifa()
+}
+
+
+class PeriodoFiscal {
+  - int id_periodo
+  - String trimestre
+  - EstadoPeriodoFiscal estado
+  + cerrarPeriodo()
+}
+
+
+class Presupuesto {
+  - int id_presupuesto
+  - Date fecha_creacion
+  - Date validez_hasta
+  - EstadoPresupuesto estado
+  + generarPresupuesto()
+  + convertirEnFactura()
+}
+
+
+class Factura {
+  - int id_factura
+  - String numero_oficial
+  - EstadoFactura estado
+  - double subtotal
+  - double impuestos
+  - double total
+  - Date fecha_emision
+  - Date fecha_vencimiento
+  + calcularTotales()
+  + emitir()
+  + rectificar()
+  + condonarDeuda()
+}
+
+
+class LineaFactura {
+  - int id_linea
+  - String concepto
+  - double precio_unitario
+  - double cantidad
+  - double subtotal
+  + calcularSubtotalLinea()
+}
+
+
+class MovimientoPago {
+  - int id_pago
+  - String referencia_pasarela {Stripe, Revolut, Transferencia}
+  - String origen
+  - double importe_recibido {> 0}
+  - Date fecha_pago
+  - EstadoConciliacion estado_conciliacion
+  + registrarMovimiento()
+  + vincularConFactura()
+  + conciliarParcialmente()
+  + detectarDoblesPagos()
+}
+
+
+class SolicitudExcepcionComercial {
+  - int id_solicitud
+  - TipoAprobacion tipo
+  - EstadoSolicitud estado
+  - double porcentaje_descuento
+  - int meses_carencia
+  - String motivo_justificacion
+  - String comentario_resolucion
+  + crearSolicitud()
+  + evaluarUmbralAprobacion()
+  + aprobar()
+  + rechazar()
+}
+
+
+class Incidencia {
+  - int id_incidencia
+  - PrioridadIncidencia prioridad
+  - EstadoIncidencia estado
+  - String resolucion
+  - boolean pausar_notificaciones
+  + abrirIncidencia()
+  + resolverIncidencia()
+}
+
+
+class RegistroAuditoria {
+  - int id_auditoria
+  - String accion_realizada
+  - String tabla_afectada
+  - int registro_id
+  - String valor_anterior
+  - String valor_nuevo
+  - Date fecha_hora
+  - String ip_origen
+  + registrarEvento()
+  + consultarLogs()
+  + exportarAuditoria()
+}
+
+
+class PlantillaNotificacion {
+  - int id_plantilla
+  - String tipo_notificacion
+  - String idioma {ES, EN}
+  - String cuerpo_mensaje
+  - int version
+  + validarSintaxisVariables()
+  + reemplazarVariablesDinamicas()
+  + restaurarVersion()
+}
+
+
+class Notificacion {
+  - int id_notificacion
+  - CanalComunicacion canal
+  - String destino
+  - EstadoEntregaNotificacion estado_entrega
+  - Date fecha_intento
+  + enviarRecordatorio()
+  + actualizarEstadoEntrega()
+  + gestionarRebote()
+}
+
+
+class ConfiguracionParametrosGlobales {
+  - int id
+  - String[] monedasSoportadas
+  - Map tiposCambio
+  - Map catalogoImpuestos
+  - double umbralesAprobacion
+  - Date[] diasFestivosCalendario
+  - String[] dominiosCorreoPermitidos
+  + actualizarParametros()
+  + simularImpactoDeCambio()
+  + cerrarPeriodoFiscal()
+}
+
+
+' ==========================================
+' RELACIONES ENTRE CLASES
+' ==========================================
+
+
+Usuario "1" -- "1" Rol : posee
+Usuario "1" -- "0..*" AsignacionCliente : gestiona
+Cliente "1" -- "0..*" AsignacionCliente : asignado a
+
+
+Cliente "1" *-- "1..*" Contacto : posee
+Cliente "0..1" -- "1" Cliente : cliente_absorbente_id
+Cliente "0..1" -- "1" TarifaPlan : suscrito a
+
+
+Cliente "1" -- "0..*" Presupuesto : recibe
+Presupuesto "0..1" ..> "1" Factura : convierte en
+Presupuesto "0..1" -- "1" EntidadEmisora : emitido por
+
+
+Factura "1" *-- "1..*" LineaFactura : contiene
+Factura "1" -- "1" Cliente : emitida a
+Factura "1" -- "1" EntidadEmisora : emitida por
+Factura "1" -- "1" PeriodoFiscal : pertenece a
+Factura "0..1" -- "1" Factura : factura_original_id
+
+
+Factura "1" -- "0..*" MovimientoPago : conciliada con
+
+
+SolicitudExcepcionComercial "0..*" -- "1" Usuario : solicitante_id
+SolicitudExcepcionComercial "0..*" -- "0..1" Usuario : aprobador_id
+SolicitudExcepcionComercial "0..*" -- "0..1" Factura : vinculada a
+
+
+Incidencia "0..*" -- "1" Cliente : reporta
+Incidencia "0..*" -- "0..1" Factura : asociada a
+Incidencia "0..*" -- "1" Usuario : responsable_id
+
+
+RegistroAuditoria "0..*" -- "1" Usuario : accion realizada por
+
+
+Notificacion "0..*" -- "1" Factura : notifica sobre
+Notificacion "0..*" -- "1" Cliente : notificada a
+PlantillaNotificacion "1" -- "0..*" Notificacion : utiliza
+
+
+PeriodoFiscal "1" -- "0..1" Usuario : cerrado_por_id
+
+
+@enduml
